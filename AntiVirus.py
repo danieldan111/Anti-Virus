@@ -52,10 +52,13 @@ def virusChecker(path):
 
 
 first = "C:/Users/ADMIN/Desktop/Harel/BoazSharabis/Img"
-first = "C:/Users/ADMIN/Downloads"
+
 with open("VirusTotal-apikey.txt", 'w') as api:
     key = input("enter your VirusTotal api key: ")
     api.write(key)
 
 folder_search(first)
 print("done scanning!")
+
+with open("VirusTotal-apikey.txt", 'w') as api:
+    api.flush()
