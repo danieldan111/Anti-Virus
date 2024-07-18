@@ -1,11 +1,13 @@
 import os
 import requests
 from hashlib import sha256
+import tkinter
 
 def main():
     
     global files_scanned
     files_scanned = 0
+
     def hash_file(path):
         sha256_hash = sha256()
         with open(path,"rb") as f:
@@ -32,6 +34,19 @@ def main():
                     virusChecker(path + "/" + file)
             except NotADirectoryError:
                 virusChecker(path + "/" + file)
+    def analyze_response(resp, path):
+        analysis = resp.text[resp.text.find("last_analysis_stats")::]
+        analysis = analysis[0:analysis.find("}") + 1]
+        for line in analysis.split("\n")[1:-1]:
+            end_of_word = line.strip()[1::].find('"') + 1
+            word_key = line.strip()[1: end_of_word]
+            value = int(line.strip()[end_of_word + 3::].strip(","))
+            if word_key == "malicious":
+                if value > 0 :
+                    print(f"this program may be malcius!, path: {path}")
+            elif word_key == "suspicious":
+                if value > 0 :
+                    print(f"this program is sus!, path: {path}")     
     def virusChecker(path):
         global files_scanned
         files_scanned += 1
@@ -46,25 +61,11 @@ def main():
             "accept": "application/json",
             "x-apikey": f"{key}"
         }
-
         response = requests.get(url, headers=headers)
-        analysis = response.text[response.text.find("last_analysis_stats")::]
-        analysis = analysis[0:analysis.find("}") + 1]
-        for line in analysis.split("\n")[1:-1]:
-            end_of_word = line.strip()[1::].find('"') + 1
-            word_key = line.strip()[1: end_of_word]
-            value = int(line.strip()[end_of_word + 3::].strip(","))
-            if word_key == "malicious":
-                if value > 0 :
-                    print(f"this program may be malcius!, path: {path}")
-            elif word_key == "suspicious":
-                if value > 0 :
-                    print(f"this program is sus!, path: {path}")
-        
+        analyze_response(response, path)
         print(f"{files_scanned / number_of_files * 100}% done!")
-        
 
-
+    
     first = "C:/Users/ADMIN/Pictures/Camera Roll"
     number_of_files = count_files(first)
     with open("VirusTotal-apikey.txt", 'w') as api:
