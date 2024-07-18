@@ -1,7 +1,37 @@
 import os
 import requests
 from hashlib import sha256
-import tkinter
+import tkinter as tk
+from tkinter import *
+
+def keySet():
+    print(key_entry.get())
+    key_entry.config(state=DISABLED)
+
+
+#tkinter setup
+window = tk.Tk()
+width = 800
+height = 800
+window.geometry(f"{width}x{height}")
+window.title("Anti Virus")
+icon = PhotoImage(file='Antilogo.png')
+window.iconphoto(True, icon)
+window.config(background="#161625")
+label = Label(window, text="Daniel's Anti Virus", font=('Arial', 25),bg='#161625', fg='White')
+label.pack()
+
+
+btn = Button(window, text="scan", font=("Arial", 15))
+btn.place(x=500, y= 200) #button
+
+
+key_label = Label(window, text="API Key here", font=('Arial', 20),bg='#161625', fg='White')
+key_label.place(x = 20, y = 100)
+key_entry = Entry(window, font=("Arial", 15),width=int(width * 0.6 / 10))
+key_entry.place(x= 10, y = 150)
+key_btn = Button(window, text="Set key", font=("Arial", 15), height=1 ,command=keySet)
+key_btn.place(x = 550, y = 145)
 
 def main():
     
@@ -50,8 +80,6 @@ def main():
     def virusChecker(path):
         global files_scanned
         files_scanned += 1
-        with open("VirusTotal-apikey.txt", 'r') as data:
-            key = data.read()
         try:
             hashed_file = hash_file(path)
         except PermissionError:
@@ -65,18 +93,14 @@ def main():
         analyze_response(response, path)
         print(f"{files_scanned / number_of_files * 100}% done!")
 
-    
+
     first = "C:/Users/ADMIN/Pictures/Camera Roll"
     number_of_files = count_files(first)
-    with open("VirusTotal-apikey.txt", 'w') as api:
-        key = input("enter your VirusTotal api key: ")
-        api.write(key)
+    
+    key = input("enter your VirusTotal api key: ")
 
     folder_search(first)
     print("done scanning!")
 
-    with open("VirusTotal-apikey.txt", 'w') as api:
-        api.flush()
-
-
-main()
+    
+window.mainloop()
