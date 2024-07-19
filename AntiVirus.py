@@ -46,24 +46,33 @@ def page_load():
         folder_path = filename
 
 
-    frame1 = Frame(window, width=600, height=500,bg='#161625')
+    frame1 = Frame(window, width=800, height=500,bg='#161625')
     frame1.pack(side=TOP, anchor=NW)
-    #frame1 components
-    key_label = Label(frame1, text="API Key here", font=('Arial', 20),bg='#161625', fg='White')
+    frame1_1 = Frame(frame1, width=800, height=200, bg="#161625")
+    frame1_1.pack()
+    frame1_2 = Frame(frame1, width=800, height=200, bg="red")
+    frame1_2.pack()
+    frame1_3 = Frame(frame1, width=800, height=100, bg="white")
+    frame1_3.pack()
+    #frame1_1 components
+    key_label = Label(frame1_1, text="API Key here", font=('Arial', 20),bg='#161625', fg='White')
     key_label.pack(side=TOP, anchor=NW)
-    key_entry = Entry(frame1, font=("Arial", 23),width= 40)
+    key_entry = Entry(frame1_1, font=("Arial", 23),width= 40)
     key_entry.pack(side=LEFT)
-    key_margin = Label(frame1, text="", width=1, bg="#161625")
+    key_margin = Label(frame1_1, text="", width=1, bg="#161625")
     key_margin.pack(side=LEFT)
     #set api
-    key_btn = Button(frame1, text="Set Key", font=("Arial", 15), width= 7,height=1 ,command=keySet)
+    key_btn = Button(frame1_1, text="Set Key", font=("Arial", 15), width= 7,height=1 ,command=keySet)
     key_btn.pack(side=LEFT)
     #clear api
-    clear_key_btn = Button(frame1, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearKey)
+    clear_key_btn = Button(frame1_1, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearKey)
     clear_key_btn.pack(side=LEFT)
+    #margin
+    # browse_margin = Label(frame1, text="", width=100, bg="white")
+    # browse_margin.pack()
     #path
-    button2 = Button(text="Browse", command=browse_button)
-    button2.pack(side=BOTTOM)
+    # button2 = Button(text="Browse", command=browse_button)
+    # button2.pack()
 
 
 page_load()
