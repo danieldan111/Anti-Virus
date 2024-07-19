@@ -3,35 +3,76 @@ import requests
 from hashlib import sha256
 import tkinter as tk
 from tkinter import *
+from tkinter import filedialog
 
-def keySet():
-    print(key_entry.get())
-    key_entry.config(state=DISABLED)
+
 
 
 #tkinter setup
 window = tk.Tk()
-width = 800
-height = 800
-window.geometry(f"{width}x{height}")
+#getting screen width and height of display
+width= window.winfo_screenwidth() 
+height= window.winfo_screenheight()
+#setting tkinter window size
+window.geometry("%dx%d" % (width, height))
+window.state('zoomed')
+
+# window.geometry(f"{width}x{height}")
 window.title("Anti Virus")
+
+#window-props
 icon = PhotoImage(file='Antilogo.png')
 window.iconphoto(True, icon)
 window.config(background="#161625")
+
+#headline
 label = Label(window, text="Daniel's Anti Virus", font=('Arial', 25),bg='#161625', fg='White')
 label.pack()
 
+def page_load():
+    def keySet():
+        global key
+        key = key_entry.get()
+        key_entry.config(state=DISABLED)
+    def clearKey():
+        global key
+        key = ""
+        key_entry.config(state=NORMAL)
+        key_entry.delete(0,END)
+    def browse_button():
+        # Allow user to select a directory and store it in global var
+        # called folder_path
+        filename = filedialog.askdirectory()
+        folder_path = filename
 
-btn = Button(window, text="scan", font=("Arial", 15))
-btn.place(x=500, y= 200) #button
+
+    frame1 = Frame(window, width=600, height=500,bg='#161625')
+    frame1.pack(side=TOP, anchor=NW)
+    #frame1 components
+    key_label = Label(frame1, text="API Key here", font=('Arial', 20),bg='#161625', fg='White')
+    key_label.pack(side=TOP, anchor=NW)
+    key_entry = Entry(frame1, font=("Arial", 23),width= 40)
+    key_entry.pack(side=LEFT)
+    key_margin = Label(frame1, text="", width=1, bg="#161625")
+    key_margin.pack(side=LEFT)
+    #set api
+    key_btn = Button(frame1, text="Set Key", font=("Arial", 15), width= 7,height=1 ,command=keySet)
+    key_btn.pack(side=LEFT)
+    #clear api
+    clear_key_btn = Button(frame1, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearKey)
+    clear_key_btn.pack(side=LEFT)
+    #path
+    button2 = Button(text="Browse", command=browse_button)
+    button2.pack(side=BOTTOM)
 
 
-key_label = Label(window, text="API Key here", font=('Arial', 20),bg='#161625', fg='White')
-key_label.place(x = 20, y = 100)
-key_entry = Entry(window, font=("Arial", 15),width=int(width * 0.6 / 10))
-key_entry.place(x= 10, y = 150)
-key_btn = Button(window, text="Set key", font=("Arial", 15), height=1 ,command=keySet)
-key_btn.place(x = 550, y = 145)
+page_load()
+
+def scan():
+    pass
+
+
+
 
 def main():
     
@@ -94,13 +135,13 @@ def main():
         print(f"{files_scanned / number_of_files * 100}% done!")
 
 
-    first = "C:/Users/ADMIN/Pictures/Camera Roll"
-    number_of_files = count_files(first)
-    
-    key = input("enter your VirusTotal api key: ")
+    # first = "C:/Users/ADMIN/Pictures/Camera Roll"
+    # number_of_files = count_files(first)
+    global key
+    print(key)
 
-    folder_search(first)
-    print("done scanning!")
+    # folder_search(first)
+    # print("done scanning!")
 
     
 window.mainloop()
