@@ -97,10 +97,11 @@ def page_load():
     frame2 = Frame(window, width=650, height=500,bg='red')
     frame2.pack(side=LEFT, anchor=NW)
     #image
+    global big_image
     big_image = PhotoImage(file = "Antivirus-biglogo.png")
-    canvas = Canvas(frame1,width = 500, height = 500, bg='black')
-    canvas.create_image(500, 500, image = big_image)
-    canvas.pack()
+    canvas = Canvas(frame2,width = 400, height = 400, bg='#161625', highlightbackground = "#161625", highlightcolor= "#161625")
+    canvas.create_image(200, 200, image = big_image)
+    canvas.pack(side=RIGHT, anchor=N)
 
 page_load()
 
