@@ -6,6 +6,8 @@ from tkinter import *
 from tkinter import filedialog
 from PIL import ImageTk, Image #pip install pillow
 from tkinter import ttk
+import ttkbootstrap as tb #pip install ttkbootstrap
+from ttkbootstrap.scrolled import ScrolledFrame
 
 
 
@@ -25,6 +27,8 @@ window.title("Anti Virus")
 icon = PhotoImage(file='Antilogo.png')
 window.iconphoto(True, icon)
 window.config(background="#161625")
+
+style = tb.Style(theme="darkly")
 
 #headline
 label = Label(window, text="Daniel's Anti Virus", font=('Arial', 25),bg='#161625', fg='White')
@@ -82,7 +86,9 @@ def page_load():
         #checking if the input is good:
         Error_counter += checkAPI()
         Error_counter += checkPath()
-        
+        if (len(key_entry.get()) == 0):
+            Error_counter += 1
+
         if Error_counter == 0:
             begin_scan(path_entry.get())
 
@@ -115,6 +121,8 @@ def page_load():
     #set api
     key_btn = Button(frame1_1, text="Set Key", font=("Arial", 15), width= 7,height=1 ,command=keySet)
     key_btn.pack(side=LEFT)
+    keys_margin = Label(frame1_1, text="", width=1, bg="#161625")
+    keys_margin.pack(side=LEFT)
     #clear api
     clear_key_btn = Button(frame1_1, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearKey)
     clear_key_btn.pack(side=LEFT)
@@ -134,6 +142,9 @@ def page_load():
     #path select
     path_select = Button(frame1_2,text="Browse", font=("Arial", 15),width= 7,height=1,command=browse_button)
     path_select.pack(side=LEFT)
+
+    keys_margin_1 = Label(frame1_2, text="", width=1, bg="#161625")
+    keys_margin_1.pack(side=LEFT)
     ##clear path
     clear_path_btn = Button(frame1_2, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearPath)
     clear_path_btn.pack(side=LEFT)
@@ -169,6 +180,20 @@ def page_load():
     proggress_bar = ttk.Progressbar(bottom_frame, orient='horizontal',mode='determinate',length=500)
     proggress_bar.pack_forget()
 
+    # display viruses
+    global viruses_frame
+    viruses_frame = ScrolledFrame(bottom_frame, autohide=False, width=800, height=300)
+    #viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
+    viruses_frame.pack_forget()
+
+    #deteced files example:
+    #def files_to_disp(viruses):
+    # virus_1 = Label(viruses_frame,text="name", font=("Arial", 50)).pack(pady=10)
+    # virus_2 = Label(viruses_frame,text="name", font=("Arial", 50)).pack(pady=10)
+    # virus_3 = Label(viruses_frame,text="name", font=("Arial", 50)).pack(pady=10)
+
+
+
     
 
 
@@ -179,6 +204,15 @@ def begin_scan(path):
     
     global files_scanned
     files_scanned = 0
+
+    def virus_to_display(path):
+        fileName = item[0][::-1]
+        fileName = fileName[0: fileName.find('/')][::-1]
+        virus_frame = Frame(viruses_frame, width=800, height=100,)
+        virus_frame.pack()
+        virus_name = Label(virus_frame, text=fileName, font=("Arial", 15))
+        virus_name.pack(side=LEFT)
+        window.update()
 
     def hash_file(path):
         sha256_hash = sha256()
@@ -212,7 +246,7 @@ def begin_scan(path):
             analysis = analysis[int(analysis.find("code")): int(analysis.find(","))]
             analysis = analysis[analysis.find(':') + 3 : -1]
             if (analysis == "QuotaExceededError"):
-                raise Exception("QuotaExceededError")
+                raise BaseException("QuotaExceededError")
         analysis = resp.text[resp.text.find("last_analysis_stats")::]
         analysis = analysis[0:analysis.find("}") + 1]
         for line in analysis.split("\n")[1:-1]:
@@ -230,7 +264,6 @@ def begin_scan(path):
                         viruses[path][1] = value
                     except ValueError:
                         viruses[path] = [0,value]
-
     def virusChecker(path):
         global files_scanned
         files_scanned += 1
@@ -247,8 +280,8 @@ def begin_scan(path):
         response = requests.get(url, headers=headers)
         try:
             analyze_response(response, path)
-        except Exception("QuotaExceededError"):
-            raise Exception("QuotaExceededError")
+        except BaseException:
+            raise BaseException("QuotaExceededError")
 
         proggress_bar["value"] = files_scanned / number_of_files * 100
         window.update()
@@ -266,12 +299,14 @@ def begin_scan(path):
     
     try:
         folder_search(path_to_scan)
-    except Exception("QuotaExceededError"):
+    except BaseException:
         print("You run out of the 500 scan a day limit!")
     else:
         print("done scanning!")
     
+    viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
     for item in viruses.items():
+        virus_to_display(item[0])
         fileName = item[0][::-1]
         fileName = fileName[0: fileName.find('/')][::-1]
         print(f"{fileName} has been flagged malicious by {item[1][0]} secuirty vendoes and suspicious by {item[1][1]}")
