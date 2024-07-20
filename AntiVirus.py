@@ -163,11 +163,11 @@ def page_load():
     
     global proggress_bar_label
     proggress_bar_label = Label(bottom_frame, text="Scan Proggress", font=("ariel", 40),bg = "#161625", fg='white')
-    proggress_bar_label.pack()
+    proggress_bar_label.pack_forget()
 
     global proggress_bar
     proggress_bar = ttk.Progressbar(bottom_frame, orient='horizontal',mode='determinate',length=500)
-    proggress_bar.pack()
+    proggress_bar.pack_forget()
 
     
 
@@ -207,6 +207,12 @@ def begin_scan(path):
             except NotADirectoryError:
                 virusChecker(path + "/" + file)
     def analyze_response(resp, path):
+        if (resp.text.find("error")):
+            analysis = resp.text[resp.text.find("error"): resp.text.find("message")]
+            analysis = analysis[int(analysis.find("code")): int(analysis.find(","))]
+            analysis = analysis[analysis.find(':') + 3 : -1]
+            if (analysis == "QuotaExceededError"):
+                raise Exception("QuotaExceededError")
         analysis = resp.text[resp.text.find("last_analysis_stats")::]
         analysis = analysis[0:analysis.find("}") + 1]
         for line in analysis.split("\n")[1:-1]:
@@ -216,9 +222,15 @@ def begin_scan(path):
             if word_key == "malicious":
                 if value > 0 :
                     print(f"this program may be malcius!, path: {path}")
+                    viruses[path] = [value, 0]
             elif word_key == "suspicious":
                 if value > 0 :
-                    print(f"this program is sus!, path: {path}")     
+                    print(f"this program is sus!, path: {path}") 
+                    try:
+                        viruses[path][1] = value
+                    except ValueError:
+                        viruses[path] = [0,value]
+
     def virusChecker(path):
         global files_scanned
         files_scanned += 1
@@ -227,12 +239,17 @@ def begin_scan(path):
         except PermissionError:
             return
         url = f"https://www.virustotal.com/api/v3/files/{hashed_file}" 
+        global key
         headers = {
             "accept": "application/json",
             "x-apikey": f"{key}"
         }
         response = requests.get(url, headers=headers)
-        analyze_response(response, path)
+        try:
+            analyze_response(response, path)
+        except Exception("QuotaExceededError"):
+            raise Exception("QuotaExceededError")
+
         proggress_bar["value"] = files_scanned / number_of_files * 100
         window.update()
 
@@ -240,15 +257,24 @@ def begin_scan(path):
     path_to_scan = f"{path}"
     number_of_files = count_files(path_to_scan)
     
+    global viruses
+    viruses = {}
     
     proggress_bar_label.pack()
     proggress_bar.pack()
     proggress_bar['value'] = 0
     
-
-    folder_search(path_to_scan)
-    print("done scanning!")
-
+    try:
+        folder_search(path_to_scan)
+    except Exception("QuotaExceededError"):
+        print("You run out of the 500 scan a day limit!")
+    else:
+        print("done scanning!")
+    
+    for item in viruses.items():
+        fileName = item[0][::-1]
+        fileName = fileName[0: fileName.find('/')][::-1]
+        print(f"{fileName} has been flagged malicious by {item[1][0]} secuirty vendoes and suspicious by {item[1][1]}")
 
 
 window.mainloop()
