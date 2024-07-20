@@ -1,9 +1,11 @@
 import os
-import requests
+import requests #pip install requests
 from hashlib import sha256
 import tkinter as tk
 from tkinter import *
 from tkinter import filedialog
+from PIL import ImageTk, Image #pip install pillow
+
 
 
 
@@ -39,21 +41,25 @@ def page_load():
         key = ""
         key_entry.config(state=NORMAL)
         key_entry.delete(0,END)
+    def clearPath():
+        path_entry.delete(0,END)
     def browse_button():
         # Allow user to select a directory and store it in global var
         # called folder_path
         filename = filedialog.askdirectory()
         folder_path = filename
-
-
-    frame1 = Frame(window, width=800, height=500,bg='#161625')
-    frame1.pack(side=TOP, anchor=NW)
-    frame1_1 = Frame(frame1, width=800, height=200, bg="#161625")
-    frame1_1.pack()
-    frame1_2 = Frame(frame1, width=800, height=200, bg="red")
-    frame1_2.pack()
-    frame1_3 = Frame(frame1, width=800, height=100, bg="white")
-    frame1_3.pack()
+        path_entry.delete(0,END)
+        path_entry.insert(0, folder_path)
+    
+    #frame1
+    frame1 = Frame(window, width=900, height=500,bg='#161625')
+    frame1.pack(side=LEFT, anchor=NW)
+    frame1_1 = Frame(frame1, width=900, height=200, bg="#161625")
+    frame1_1.pack(anchor=W)
+    frame1_2 = Frame(frame1, width=900, height=200, bg="#161625")
+    frame1_2.pack(anchor=W)
+    frame1_3 = Frame(frame1, width=900, height=100, bg="#161625")
+    frame1_3.pack(anchor=W)
     #frame1_1 components
     key_label = Label(frame1_1, text="API Key here", font=('Arial', 20),bg='#161625', fg='White')
     key_label.pack(side=TOP, anchor=NW)
@@ -67,13 +73,34 @@ def page_load():
     #clear api
     clear_key_btn = Button(frame1_1, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearKey)
     clear_key_btn.pack(side=LEFT)
+    #frame1_2
     #margin
-    # browse_margin = Label(frame1, text="", width=100, bg="white")
-    # browse_margin.pack()
-    #path
-    # button2 = Button(text="Browse", command=browse_button)
-    # button2.pack()
+    path_margin = Label(frame1_2, text="", height=1, bg="#161625")
+    path_margin.pack()
+    #path label
+    path_label = Label(frame1_2, text="Path for scan", font=('Arial', 20),bg='#161625', fg='White')
+    path_label.pack(side=TOP, anchor=NW)
+    #path type
+    path_entry = Entry(frame1_2, font=("Arial", 23),width= 40)
+    path_entry.pack(side=LEFT)
+    #btn margin
+    path_btn_margin = Label(frame1_2, text="", width=1, bg="#161625")
+    path_btn_margin.pack(side=LEFT)
+    #path select
+    path_select = Button(frame1_2,text="Browse", font=("Arial", 15),width= 7,height=1,command=browse_button)
+    path_select.pack(side=LEFT)
+    ##clear path
+    clear_path_btn = Button(frame1_2, text="Clear", font=("Arial", 15), width= 7,height=1 ,command=clearPath)
+    clear_path_btn.pack(side=LEFT)
 
+    #frame2
+    frame2 = Frame(window, width=650, height=500,bg='red')
+    frame2.pack(side=LEFT, anchor=NW)
+    #image
+    big_image = PhotoImage(file = "Antivirus-biglogo.png")
+    canvas = Canvas(frame1,width = 500, height = 500, bg='black')
+    canvas.create_image(500, 500, image = big_image)
+    canvas.pack()
 
 page_load()
 
