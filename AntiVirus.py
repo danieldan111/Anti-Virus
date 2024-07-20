@@ -182,7 +182,7 @@ def page_load():
 
     # display viruses
     global viruses_frame
-    viruses_frame = ScrolledFrame(bottom_frame, autohide=False, width=800, height=300)
+    viruses_frame = ScrolledFrame(bottom_frame, autohide=False, width=1000, height=300)
     #viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
     viruses_frame.pack_forget()
 
@@ -205,13 +205,19 @@ def begin_scan(path):
     global files_scanned
     files_scanned = 0
 
-    def virus_to_display(path):
-        fileName = item[0][::-1]
+    def virus_to_display(data):
+        fileName = data[0][::-1]
         fileName = fileName[0: fileName.find('/')][::-1]
-        virus_frame = Frame(viruses_frame, width=800, height=100,)
+        virus_frame = Frame(viruses_frame, width=800, height=200, bg='red')
         virus_frame.pack()
-        virus_name = Label(virus_frame, text=fileName, font=("Arial", 15))
+        virus_name = Label(virus_frame, text=fileName, font=("Arial", 25), height=3)
         virus_name.pack(side=LEFT)
+        #margin
+        marg_virus = Label(virus_frame, text="", width=50)
+        marg_virus.pack(side=LEFT)
+
+        data_found = Label(virus_frame, text=f"Malicious: {data[1][0]}", font=("Arial", 25))
+        data_found.pack(side=LEFT)
         window.update()
 
     def hash_file(path):
@@ -306,7 +312,7 @@ def begin_scan(path):
     
     viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
     for item in viruses.items():
-        virus_to_display(item[0])
+        virus_to_display(item)
         fileName = item[0][::-1]
         fileName = fileName[0: fileName.find('/')][::-1]
         print(f"{fileName} has been flagged malicious by {item[1][0]} secuirty vendoes and suspicious by {item[1][1]}")
