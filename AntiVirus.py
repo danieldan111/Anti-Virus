@@ -204,14 +204,16 @@ def begin_scan(path):
     def clean_frame(frame: Frame):
         for widget in frame.winfo_children():
             widget.destroy()
-
     def deleteFile(path, frame: Frame):
         os.remove(path)
         frame.destroy()
         print("deleting: " + path)
 
+
     global files_scanned
     files_scanned = 0
+
+
     def virus_to_display(data):
         fileName = data[0][::-1]
         fileName = fileName[0: fileName.find('/')][::-1]
@@ -268,13 +270,18 @@ def begin_scan(path):
                 raise BaseException("QuotaExceededError")
         analysis = resp.text[resp.text.find("last_analysis_stats")::]
         analysis = analysis[0:analysis.find("}") + 1]
+
         malicious = analysis[analysis.find("malicious")::]#find the amount
         malicious = malicious[malicious.find(":") + 1: malicious.find(",")]
-        malicious = int(malicious)
 
         suspicious = analysis[analysis.find("suspicious")::] # find the amount
         suspicious = suspicious[suspicious.find(":") + 1: suspicious.find(",")]
-        suspicious = int(suspicious)
+
+        try:
+            malicious = int(malicious)
+            suspicious = int(suspicious)
+        except ValueError:
+            return
 
         if malicious > 0 or suspicious > 0:
             virus_to_display((path, [malicious, suspicious]))
