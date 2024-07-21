@@ -31,8 +31,8 @@ window.config(background="#161625")
 style = tb.Style(theme="darkly")
 
 #headline
-label = Label(window, text="Daniel's Anti Virus", font=('Arial', 25),bg='#161625', fg='White')
-label.pack()
+label = Label(window, text="Daniel's Anti Virus", font=('Arial', 35),bg='#161625', fg='White')
+label.pack(pady=20)
 
 
 def page_load():
@@ -106,7 +106,7 @@ def page_load():
     frame1_1.pack(anchor=W)
     frame1_2 = Frame(frame1, width=900, height=200, bg="#161625")
     frame1_2.pack(anchor=W)
-    frame1_3 = Frame(frame1, width=900, height=100, bg="#161625")
+    frame1_3 = Frame(frame1, width=900, height=50, bg="#161625")
     frame1_3.pack(anchor=W)
     #frame1_1 components
     #marg
@@ -150,12 +150,12 @@ def page_load():
     clear_path_btn.pack(side=LEFT)
 
     #frame2
-    frame2 = Frame(top_frame, width=650, height=500,bg='red')
+    frame2 = Frame(top_frame, width=650, height=450,bg='red')
     frame2.pack(side=LEFT, anchor=NW)
     #image
     global big_image
     big_image = PhotoImage(file = "antiVirus-mainimg.png")
-    canvas = Canvas(frame2,width = 400, height = 400, bg='#161625', highlightbackground = "#161625", highlightcolor= "#161625")
+    canvas = Canvas(frame2,width = 400, height = 350, bg='#161625', highlightbackground = "#161625", highlightcolor= "#161625")
     canvas.create_image(200, 200, image = big_image)
     canvas.pack(side=RIGHT, anchor=N)
     #margin - top
@@ -180,9 +180,13 @@ def page_load():
     proggress_bar = ttk.Progressbar(bottom_frame, orient='horizontal',mode='determinate',length=500)
     proggress_bar.pack_forget()
 
+    #margin
+    marg_pro = Label(bottom_frame, text="", height=4, bg = "#161625")
+    marg_pro.pack()
+    
     # display viruses
     global viruses_frame
-    viruses_frame = ScrolledFrame(bottom_frame, autohide=False, width=1000, height=300)
+    viruses_frame = ScrolledFrame(bottom_frame, autohide=False, width=1000, height=350)
     #viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
     viruses_frame.pack_forget()
 
@@ -201,10 +205,17 @@ page_load()
 
 
 def begin_scan(path):
-    
+    def clean_frame(frame: Frame):
+        for widget in frame.winfo_children():
+            widget.destroy()
+
+    def deleteFile(path, frame: Frame):
+        os.remove(path)
+        frame.destroy()
+        print("deleting: " + path)
+
     global files_scanned
     files_scanned = 0
-
     def virus_to_display(data):
         fileName = data[0][::-1]
         fileName = fileName[0: fileName.find('/')][::-1]
@@ -213,11 +224,17 @@ def begin_scan(path):
         virus_name = Label(virus_frame, text=fileName, font=("Arial", 25), height=3)
         virus_name.pack(side=LEFT)
         #margin
-        marg_virus = Label(virus_frame, text="", width=50)
+        marg_virus = Label(virus_frame, text="", width=15)
         marg_virus.pack(side=LEFT)
-
+        #Malicious/suspiucous
         data_found = Label(virus_frame, text=f"Malicious: {data[1][0]}", font=("Arial", 25))
         data_found.pack(side=LEFT)
+        #marg-btn
+        marg_btn = Label(virus_frame, text="", width=10)
+        marg_btn.pack(side=LEFT)
+        #delete
+        delete_virus = Button(virus_frame, text="Delete", font=("Arial", 23) ,command=lambda: deleteFile(data[0], virus_frame))
+        delete_virus.pack(side=LEFT)
         window.update()
 
     def hash_file(path):
@@ -255,21 +272,18 @@ def begin_scan(path):
                 raise BaseException("QuotaExceededError")
         analysis = resp.text[resp.text.find("last_analysis_stats")::]
         analysis = analysis[0:analysis.find("}") + 1]
-        for line in analysis.split("\n")[1:-1]:
-            end_of_word = line.strip()[1::].find('"') + 1
-            word_key = line.strip()[1: end_of_word]
-            value = int(line.strip()[end_of_word + 3::].strip(","))
-            if word_key == "malicious":
-                if value > 0 :
-                    print(f"this program may be malcius!, path: {path}")
-                    viruses[path] = [value, 0]
-            elif word_key == "suspicious":
-                if value > 0 :
-                    print(f"this program is sus!, path: {path}") 
-                    try:
-                        viruses[path][1] = value
-                    except ValueError:
-                        viruses[path] = [0,value]
+        malicious = analysis[analysis.find("malicious")::]#find the amount
+        malicious = malicious[malicious.find(":") + 1: malicious.find(",")]
+        malicious = int(malicious)
+
+        suspicious = analysis[analysis.find("suspicious")::] # find the amount
+        suspicious = suspicious[suspicious.find(":") + 1: suspicious.find(",")]
+        suspicious = int(suspicious)
+
+        if malicious > 0 or suspicious > 0:
+            virus_to_display((path, [malicious, suspicious]))
+
+        
     def virusChecker(path):
         global files_scanned
         files_scanned += 1
@@ -298,11 +312,15 @@ def begin_scan(path):
     
     global viruses
     viruses = {}
-    
+
+    clean_frame(viruses_frame)
+
     proggress_bar_label.pack()
     proggress_bar.pack()
     proggress_bar['value'] = 0
     
+    viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
+
     try:
         folder_search(path_to_scan)
     except BaseException:
@@ -310,12 +328,14 @@ def begin_scan(path):
     else:
         print("done scanning!")
     
-    viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
-    for item in viruses.items():
-        virus_to_display(item)
-        fileName = item[0][::-1]
-        fileName = fileName[0: fileName.find('/')][::-1]
-        print(f"{fileName} has been flagged malicious by {item[1][0]} secuirty vendoes and suspicious by {item[1][1]}")
+    
+    # viruses_frame.pack(pady=15, padx=15, fill=BOTH, expand=YES)
+
+    # for item in viruses.items():
+    #     virus_to_display(item)
+    #     fileName = item[0][::-1]
+    #     fileName = fileName[0: fileName.find('/')][::-1]
+    #     print(f"{fileName} has been flagged malicious by {item[1][0]} secuirty vendoes and suspicious by {item[1][1]}")
 
 
 window.mainloop()
