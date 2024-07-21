@@ -197,10 +197,6 @@ def page_load():
     # virus_3 = Label(viruses_frame,text="name", font=("Arial", 50)).pack(pady=10)
 
 
-
-    
-
-
 page_load()
 
 
